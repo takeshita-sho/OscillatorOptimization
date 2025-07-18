@@ -1,6 +1,5 @@
-using OscillatorOptimization
 using Test
-
-@testset "OscillatorOptimization.jl" begin
-    # Write your tests here.
-end
+ 
+@testset "OscTools internal tests" begin
+    include("observable_trait_tests.jl")
+end 
