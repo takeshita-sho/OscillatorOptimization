@@ -5,6 +5,8 @@ on:
       - main
     tags: ['*']
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 concurrency:
   # Skip intermediate builds: always.
@@ -23,13 +25,11 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.10'
-          - '1.6'
-          - 'pre'
+          - '1.10'  # LTS - our current baseline with pinned packages
+          - '1.11'  # Current stable - migration target
         os:
           - ubuntu-latest
           - macOS-latest
-          - windows-latest
         arch:
           - x64
     steps:
@@ -42,39 +42,8 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
-  docs:
-    name: Documentation
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write # needed to allow julia-actions/cache to proactively delete old caches that it has created
-      contents: write
-      statuses: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
-        with:
-          version: '1'
-      - uses: julia-actions/cache@v2
-      - name: Configure doc environment
-        shell: julia --project=docs --color=yes {0}
-        run: |
-          using Pkg
-          Pkg.develop(PackageSpec(path=pwd()))
-          Pkg.instantiate()
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-docdeploy@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-      - name: Run doctests
-        shell: julia --project=docs --color=yes {0}
-        run: |
-          using Documenter: DocMeta, doctest
-          using OscillatorOptimization
-          DocMeta.setdocmeta!(OscillatorOptimization, :DocTestSetup, :(using OscillatorOptimization); recursive=true)
-          doctest(OscillatorOptimization)

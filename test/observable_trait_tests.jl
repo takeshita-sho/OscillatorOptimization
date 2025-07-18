@@ -1,8 +1,5 @@
 using Test
-using DrWatson
-@quickactivate "GeometricallyTunableOscillator"
-include(srcdir("OscTools", "OscTools.jl"))
-using .OscTools
+using OscillatorOptimization
 
 models = Dict(:full => fullrn, :trimer => trimer_rn)
 
