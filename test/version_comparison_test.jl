@@ -14,7 +14,7 @@ using Statistics: mean, std
     # Create a fixed test individual (same parameters across Julia versions)
     rng = MersenneTwister(1234)
     test_population = generate_population(fullrn, 1, fixed_params; rng=rng)
-    test_individual = test_population[Individuals=1]
+    test_individual = first(test_population)  # SlicedDimArray acts like a 1D vector
     
     @testset "Individual ODE solution reproducibility" begin
         # Test that the same individual produces the same ODE solution
