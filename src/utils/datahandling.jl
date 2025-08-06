@@ -29,3 +29,25 @@ function read_all_csvs(sweepDF_datapath)
     return reduce(vcat, dfs)
 end
 
+
+"""
+    solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10)
+
+Solves a single row of a dataframe using the given ODE problem.
+"""
+function solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10)
+    # Get the parameters from the row 
+    params = row[r"k|DF"] |> pairs |> collect
+
+    # Get the initial conditions from the row 
+    init_conds = row[r"^(L|K|P|A|B|C|D)$"] |> pairs |> collect
+    
+    # Remake the problem 
+    newprob = remake(odeprob, p = params, u0 = init_conds)
+
+    # Solve the problem 
+    sol = solve(newprob, Rodas5P(autodiff = AutoForwardDiff()), abstol = abstol, reltol = reltol, tspan = tspan)
+
+    return sol
+end
+

@@ -101,7 +101,7 @@ module OscillatorOptimization
 
     # Data handling
     include("utils/datahandling.jl")
-    export read_all_csvs
+    export read_all_csvs, solve_row
 
     # Plotting utilities
     include("utils/plotting_utils.jl")

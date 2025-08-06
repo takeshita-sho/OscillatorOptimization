@@ -329,3 +329,47 @@ The codebase is organized into several modules, each handling different aspects 
    # Alternative: Use trimer assembly model
    # trimer_opt_sys = OptimizationReactionSystem(trimer_rn, alg; fixed_params)
    # trimer_results = run_optimization(1000, trimer_opt_sys; <same parameters>)
+   ```
+
+
+4. **Analyze Results:**
+
+   - If instead you want to re-solve for an existing solution from a `DataFrame` dataset, you can use the `solve_row` function.
+
+   ```julia
+   #- Activate the project
+   using DrWatson
+   @quickactivate "GeometricallyTunableOscillator"
+   include(srcdir("OscTools", "OscTools.jl"))
+   using .OscTools
+
+   begin
+       using OrdinaryDiffEq
+       using CSV
+   end
+
+   # Load the results dataframe
+   results_df = CSV.read(datadir("optimization_results.csv"), DataFrame)
+
+   # Solve the first row, returns an `ODESolution` object
+   sol = solve_row(results_df[1, :], fullrn)
+
+   # Plot the solution with desired observables/species
+   plot(sol, idxs = [:Amem_old, :Amem])
+
+   # Or extract individual solutions as Vectors 
+   amem = sol[:Amem]
+   L = sol[:L]
+   K = sol[:K]
+   P = sol[:P]
+
+   LpA = sol[:LpA]
+   ```
+
+
+
+
+
+
+
+
