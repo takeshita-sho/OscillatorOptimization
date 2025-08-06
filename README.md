@@ -334,7 +334,7 @@ The codebase is organized into several modules, each handling different aspects 
 
 4. **Analyze Results:**
 
-   - If instead you want to re-solve for an existing solution from a `DataFrame` dataset, you can use the `solve_row` function.
+   - If instead you want to re-solve for an existing solution from a `DataFrame` dataset, you can use the `solve_row` method.
 
    ```julia
    #- Activate the project
@@ -366,6 +366,35 @@ The codebase is organized into several modules, each handling different aspects 
    LpA = sol[:LpA]
    ```
 
+   **For High-Throughput Analysis:** If you need to solve many rows from the same `DataFrame` efficiently, use the performant version that returns a solver function. This is useful for loops or parallel processing.
+
+   ```julia
+   # Create a performant solver function (one-time setup)
+   fast_solver = solve_row(results_df, fullrn)
+
+   # Now solve any row efficiently
+   sol1 = fast_solver(1)      # Solve first row
+   sol42 = fast_solver(42)    # Solve 42nd row
+   sol1000 = fast_solver(1000) # Solve 1000th row
+
+   # Perfect for loops or parallel processing
+   solutions = [fast_solver(i) for i in 1:100]  # Solve first 100 rows
+   
+   # Or for specific analysis
+   interesting_rows = [1, 42, 100, 500, 1000]
+   interesting_solutions = [fast_solver(i) for i in interesting_rows]
+   ```
+
+   **Performance Benefits:**
+   - **One-time setup cost**: Column extraction and setter creation happens once
+   - **Fast repeated solves**: Uses pre-extracted matrices and SymbolicIndexingInterface
+   - **Thread-safe**: Each call creates isolated problem copies
+   - **Memory efficient**: Uses `view()` for zero-copy matrix access
+
+   **When to Use Each Method:**
+   - **`solve_row(row, odeprob)`**: For interactive use, single solves, or when you have individual rows
+   - **`solve_row(df, odeprob)`**: For high-throughput workflows, loops, or when you need to solve many rows from the same DataFrame
+   ```
 
 
 

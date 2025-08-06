@@ -79,21 +79,26 @@ function solve_row(data::AbstractDataFrame, odeprob::ODEProblem; tspan = (0.0, 2
     parameter_cols = r"k|DF"
     species_cols = r"^(L|K|P|A|B|C|D)$"
 
+    # Pre-extract data to matrices for fast indexing
+    param_matrix = Matrix(data[!, parameter_cols])
+    species_matrix = Matrix(data[!, species_cols])
+
     # Create fast setters
     set_params = setp(odeprob, parameter_cols)
     set_species = setu(odeprob, species_cols)
     
     # Return function that uses fast setters
     return function(row_index::Int; kwargs...)
-        # Get the row
-        row = data[row_index, :]
-
-        # Set the parameters and species
-        set_params(odeprob, row[parameter_cols])
-        set_species(odeprob, row[species_cols])
-
+        
+        # Create thread-safe problem copy
+        prob = remake(odeprob, p = copy(odeprob.p), u0 = copy(odeprob.u0))
+        
+        # Set the parameters and species using fast matrix indexing
+        set_params(prob, view(param_matrix, row_index, :))
+        set_species(prob, view(species_matrix, row_index, :))
+        
         # Solve and return
-        return solve(odeprob, Rodas5P(autodiff = AutoForwardDiff(chunksize = length(odeprob.u0))), abstol = abstol, reltol = reltol, tspan = tspan, kwargs...)
+        return solve(prob, Rodas5P(autodiff = AutoForwardDiff(chunksize = length(odeprob.u0))), abstol = abstol, reltol = reltol, tspan = tspan, kwargs...)
     end
 end
 
