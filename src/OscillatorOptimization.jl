@@ -48,6 +48,12 @@ module OscillatorOptimization
     end
     export logrange 
 
+    # Re-export commonly used functions from dependencies
+    export ODEProblem, ODESolution  # from OrdinaryDiffEq
+    export read, write  # from CSV
+    export BLAS  # from LinearAlgebra
+    export DataFrame  # from DataFrames
+
 
     #* Source code loading
     # Catalyst ReactionSystem model definitions

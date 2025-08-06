@@ -1,8 +1,8 @@
-# **Geometrically Tunable Oscillator: Optimization of Oscillatory Systems Using Evolutionary Algorithms**
+# **OscillatorOptimization.jl: Optimization of Oscillatory Systems Using Evolutionary Algorithms**
 
 ## **Overview**
 
-This module implements a custom Quality Diversity (QD) evolutionary algorithm to optimize oscillatory biological systems modeled with differential equations. The project supports two main models: a lipid oscillator system and a coupled trimer assembly system. The goal is to find parameter sets that produce desired oscillatory behavior in systems of ordinary differential equations (ODEs). The codebase integrates with the [Evolutionary.jl](https://github.com/wildart/Evolutionary.jl) framework, uses trait-based dispatch for model-agnostic optimization, and leverages Julia's capabilities for high-performance numerical computing.
+This package implements a custom Quality Diversity (QD) evolutionary algorithm to optimize oscillatory biological systems modeled with differential equations. The project supports two main models: a lipid oscillator system and a coupled trimer assembly system. The goal is to find parameter sets that produce desired oscillatory behavior in systems of ordinary differential equations (ODEs). The codebase integrates with the [Evolutionary.jl](https://github.com/wildart/Evolutionary.jl) framework, uses trait-based dispatch for model-agnostic optimization, and leverages Julia's capabilities for high-performance numerical computing.
 
 ## **Table of Contents**
 
@@ -29,7 +29,7 @@ This module implements a custom Quality Diversity (QD) evolutionary algorithm to
 ## **Features**
 
 - Custom implementation of a Quality Diversity evolutionary algorithm.
-- Integration with Evolutionary.jl for optimization routines.
+- Integration with `Evolutionary.jl` for optimization routines.
 - **Trait-based dispatch system** for model-agnostic optimization pipeline.
 - **Multiple model support**: Lipid oscillator and trimer assembly models.
 - Evaluation of ODE systems with customizable parameters and initial conditions.
@@ -38,6 +38,31 @@ This module implements a custom Quality Diversity (QD) evolutionary algorithm to
 - Parallel evaluation of individuals with multithreading support.
 - Comprehensive tracing and recording of optimization progress.
 - Results aggregation and data processing for analysis and visualization.
+
+## **Installation**
+
+Since OscillatorOptimization.jl is not yet registered in the official Julia General registry, you can install it directly from GitHub:
+
+**From source:**
+
+```julia
+julia> using Pkg; Pkg.add(url="https://github.com/jonathanfischer97/OscillatorOptimization.jl")
+```
+
+Or using the package manager interface:
+
+```julia
+julia> ] # enters the pkg interface
+Pkg> add https://github.com/jonathanfischer97/OscillatorOptimization.jl
+```
+
+Alternatively, you can clone the repository and develop it locally:
+
+```julia
+julia> using Pkg; Pkg.develop(path="/path/to/OscillatorOptimization.jl")
+```
+
+## **Getting Started**
 
 ## **Code Structure**
 
@@ -296,20 +321,14 @@ The codebase is organized into several modules, each handling different aspects 
 3. **Run the Optimization:**
 
    ```julia
-   #- Activate the project
-   using DrWatson
-   @quickactivate "GeometricallyTunableOscillator"
-   include(srcdir("OscTools", "OscTools.jl"))
-   using .OscTools
+   # Load the package (includes commonly used functions from dependencies)
+   using OscillatorOptimization
 
-   begin
-       # Set BLAS threads to 1 to avoid multithreading issues
-       using LinearAlgebra
-       BLAS.set_num_threads(1)
+   # Import additional solvers if needed (Rodas5P is commonly used for stiff problems)
+   using OrdinaryDiffEq: Rodas5P
 
-       using OrdinaryDiffEq
-       using CSV
-   end
+   # Set BLAS threads to 1 to avoid multithreading issues
+   BLAS.set_num_threads(1)
 
    # Define fixed parameters
    fixed_params = Dict(:DF => 100.0)
@@ -324,11 +343,25 @@ The codebase is organized into several modules, each handling different aspects 
 
    # Access results dataframe and save to disk
    results_df = fixed_results.results_df
-   CSV.write(datadir("optimization_results", "fixed_DF100_results.csv"), results_df)
+   write("optimization_results.csv", results_df)
 
    # Alternative: Use trimer assembly model
    # trimer_opt_sys = OptimizationReactionSystem(trimer_rn, alg; fixed_params)
    # trimer_results = run_optimization(1000, trimer_opt_sys; <same parameters>)
+   ```
+
+   **Note:** You can use different ODE solvers by importing them from `OrdinaryDiffEq`. For example:
+   ```julia
+   using OrdinaryDiffEq: Tsit5, Rosenbrock23, Vern9
+   
+   # For non-stiff problems
+   alg = Tsit5()
+   
+   # For stiff problems (alternative to Rodas5P)
+   alg = Rosenbrock23()
+   
+   # For high accuracy
+   alg = Vern9()
    ```
 
 
@@ -337,19 +370,14 @@ The codebase is organized into several modules, each handling different aspects 
    - If instead you want to re-solve for an existing solution from a `DataFrame` dataset, you can use the `solve_row` method.
 
    ```julia
-   #- Activate the project
-   using DrWatson
-   @quickactivate "GeometricallyTunableOscillator"
-   include(srcdir("OscTools", "OscTools.jl"))
-   using .OscTools
+   # Load the package (includes commonly used functions from dependencies)
+   using OscillatorOptimization
 
-   begin
-       using OrdinaryDiffEq
-       using CSV
-   end
+   # Set BLAS threads to 1 to avoid multithreading issues
+   BLAS.set_num_threads(1)
 
    # Load the results dataframe
-   results_df = CSV.read(datadir("optimization_results.csv"), DataFrame)
+   results_df = read("optimization_results.csv", DataFrame)
 
    # Solve the first row, returns an `ODESolution` object
    sol = solve_row(results_df[1, :], fullrn)
@@ -362,7 +390,6 @@ The codebase is organized into several modules, each handling different aspects 
    L = sol[:L]
    K = sol[:K]
    P = sol[:P]
-
    LpA = sol[:LpA]
    ```
 
@@ -394,11 +421,3 @@ The codebase is organized into several modules, each handling different aspects 
    **When to Use Each Method:**
    - **`solve_row(row, odeprob)`**: For interactive use, single solves, or when you have individual rows
    - **`solve_row(df, odeprob)`**: For high-throughput workflows, loops, or when you need to solve many rows from the same DataFrame
-   ```
-
-
-
-
-
-
-
