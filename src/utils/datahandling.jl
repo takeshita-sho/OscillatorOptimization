@@ -31,11 +31,11 @@ end
 
 
 """
-    solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10)
+    solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10) -> ODESolution
 
-Solves a single row of a dataframe using the given ODE problem.
+Solves a single row of a dataframe using the given ODE problem. For interactive use; the regex makes it not performant.
 """
-function solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10)
+function solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10, kwargs...)
     # Get the parameters from the row 
     params = row[r"k|DF"] |> pairs |> collect
 
@@ -46,8 +46,55 @@ function solve_row(row::DataFrameRow, odeprob::ODEProblem; tspan = (0.0, 2000.0)
     newprob = remake(odeprob, p = params, u0 = init_conds)
 
     # Solve the problem 
-    sol = solve(newprob, Rodas5P(autodiff = AutoForwardDiff()), abstol = abstol, reltol = reltol, tspan = tspan)
+    sol = solve(newprob, Rodas5P(autodiff = AutoForwardDiff(chunksize = length(odeprob.u0))), abstol = abstol, reltol = reltol, tspan = tspan, kwargs...)
 
     return sol
 end
+
+"""
+    solve_row(data::DataFrame, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10, kwargs...) -> Function
+
+Returns a performant function that can solve ODEs for any row index in the DataFrame using SymbolicIndexingInterface.
+The returned function takes a row index and returns an ODESolution.
+
+# Arguments
+- `data`: DataFrame containing parameters and initial conditions
+- `odeprob`: Base ODE problem to modify
+
+# Returns
+- `Function`: A function `f(row_index)` that returns an ODESolution for the specified row
+
+# Example
+```julia
+# Create the solver function
+solver_func = solve_row(df, odeprob)
+
+# Solve for specific rows
+sol1 = solver_func(1)  # Solve first row
+sol42 = solver_func(42)  # Solve 42nd row
+```
+"""
+function solve_row(data::AbstractDataFrame, odeprob::ODEProblem; tspan = (0.0, 2000.0), abstol = 1e-10, reltol = 1e-10, kwargs...)
+    # Extract columns using existing regex (only once)
+    parameter_cols = r"k|DF"
+    species_cols = r"^(L|K|P|A|B|C|D)$"
+
+    # Create fast setters
+    set_params = setp(odeprob, parameter_cols)
+    set_species = setu(odeprob, species_cols)
+    
+    # Return function that uses fast setters
+    return function(row_index::Int; kwargs...)
+        # Get the row
+        row = data[row_index, :]
+
+        # Set the parameters and species
+        set_params(odeprob, row[parameter_cols])
+        set_species(odeprob, row[species_cols])
+
+        # Solve and return
+        return solve(odeprob, Rodas5P(autodiff = AutoForwardDiff(chunksize = length(odeprob.u0))), abstol = abstol, reltol = reltol, tspan = tspan, kwargs...)
+    end
+end
+
 
