@@ -2,6 +2,8 @@
 
 ## **Overview**
 
+> **Note for AI agents:** For current development status, progress tracking, and known issues, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
 This package implements a custom Quality Diversity (QD) evolutionary algorithm to optimize oscillatory biological systems modeled with differential equations. The project supports two main models: a lipid oscillator system and a coupled trimer assembly system. The goal is to find parameter sets that produce desired oscillatory behavior in systems of ordinary differential equations (ODEs). The codebase integrates with the [Evolutionary.jl](https://github.com/wildart/Evolutionary.jl) framework, uses trait-based dispatch for model-agnostic optimization, and leverages Julia's capabilities for high-performance numerical computing.
 
 ## **Table of Contents**
