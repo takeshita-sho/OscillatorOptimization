@@ -7,7 +7,6 @@ module OscillatorOptimization
     using DiffEqCallbacks
     using ModelingToolkit: setmetadata, VariableTunable, VariableBounds, istunable, parameters, unknowns, getbounds, tunable_parameters, AbstractSystem, extend, structural_simplify, independent_variable, hasbounds, get_defaults, varmap_to_vars, get_observed, observed, defaults, getname
     using SymbolicIndexingInterface: getu, getp, setp, setu, parameter_symbols, parameter_values, all_variable_symbols
-    using Symbolics
     using ADTypes
 
     #- Population generation
@@ -108,8 +107,4 @@ module OscillatorOptimization
     # Data handling
     include("utils/datahandling.jl")
     export read_all_csvs, solve_row
-
-    # Plotting utilities
-    include("utils/plotting_utils.jl")
-    export parse_parameter
 end
