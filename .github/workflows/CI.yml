@@ -38,17 +38,6 @@ jobs:
         with:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@v2
-      - name: Pin specific package versions for version testing
-        run: |
-          julia --project -e '
-            using Pkg
-            Pkg.add([
-              Pkg.PackageSpec(name="DiffEqCallbacks", version="3.9.1"),
-              Pkg.PackageSpec(name="ModelingToolkit", version="9.41.0"), 
-              Pkg.PackageSpec(name="SymbolicIndexingInterface", version="0.3.37")
-            ])
-            Pkg.pin(["DiffEqCallbacks", "ModelingToolkit", "SymbolicIndexingInterface"])
-          '
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
