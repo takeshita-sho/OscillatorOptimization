@@ -48,20 +48,20 @@ Since OscillatorOptimization.jl is not yet registered in the official Julia Gene
 **From source:**
 
 ```julia
-julia> using Pkg; Pkg.add(url="https://github.com/jonathanfischer97/OscillatorOptimization.jl")
+julia> using Pkg; Pkg.add(url="https://github.com/JohnsonBiophysicsLab/OscillatorOptimization.git")
 ```
 
 Or using the package manager interface:
 
 ```julia
 julia> ] # enters the pkg interface
-Pkg> add https://github.com/jonathanfischer97/OscillatorOptimization.jl
+Pkg> add https://github.com/JohnsonBiophysicsLab/OscillatorOptimization.git
 ```
 
 Alternatively, you can clone the repository and develop it locally:
 
 ```julia
-julia> using Pkg; Pkg.develop(path="/path/to/OscillatorOptimization.jl")
+julia> using Pkg; Pkg.develop(path="https://github.com/JohnsonBiophysicsLab/OscillatorOptimization.git")
 ```
 
 ## **Getting Started**
