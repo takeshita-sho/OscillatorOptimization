@@ -9,6 +9,7 @@ function evaluate_individual!(phenotype, individual, optsys)
     sol = solve(newprob, optsys.alg, callback=cb)
 
     if !successful_retcode(sol.retcode)
+        print("Unsuccessful")
         return phenotype
     end
 
