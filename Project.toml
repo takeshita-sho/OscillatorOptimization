@@ -32,6 +32,7 @@ Symbolics = "0c5d862f-8fc5-44d9-94d3-e55075b841a5"
 
 [compat]
 julia = "1.10, 1.11"
+Symbolics = "6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
